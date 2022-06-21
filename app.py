@@ -40,6 +40,7 @@ async def startup():
 async def shutdown():
     await database.disconnect()
 
+
 @app.post("/posts/", response_model=Post)
 async def create(post:PostAdd):
     query = posts.insert().values(body=post.body, author=post.author)
@@ -53,6 +54,12 @@ async def get_all():
 
 @app.put("/posts/{post_id}", response_model=Post)
 async def update(post_id: int, payload: PostAdd):
-    query = posts.update().where(posts.c.id==post_id).values(body=payload.body, author=payload.author)
+    query = posts.update().where(posts.c.id == post_id).values(body=payload.body, author=payload.author)
     await database.execute(query)
     return {'id': post_id, **payload.dict()}
+
+@app.delete("/posts/{post_id}")
+async def remove(post_id: int):
+    query = posts.delete().where(posts.c.id == post_id)
+    await database.execute(query)
+    return {'message': f'Post {post_id} deleted'}
